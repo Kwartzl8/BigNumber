@@ -3,6 +3,22 @@
 #include <vector>
 
 class BigNumber {
+/*---------------------------------------------------------
+* Author: Alexandru Dobra
+* GitHub: https://github.com/Kwartzl8
+* Date: 06/10/2021
+* 
+* A class that allows creation of and operations on integers 
+* with arbitrary length (maximum 36 billion digits).
+* 
+* Currently, only positive integers are supported and the
+* operations are limited to addition, multiplication and
+* exponentiation.
+* 
+* TODO: error checking on most inputs
+* 
+----------------------------------------------------------*/
+
 	std::vector <int> value;
 public:
 	BigNumber();
@@ -18,6 +34,8 @@ public:
 	template <typename integer>
 	BigNumber& operator=(integer x) {
 		value.clear();
+
+		//make sure the components do not exceed 9 digits
 		while(x != 0) {
 			value.push_back(x % 1000000000);
 			x /= 1000000000;

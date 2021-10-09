@@ -13,6 +13,7 @@ int utility_digit_digit_no(integer temp) {
 	return digitNo;
 }
 
+// initialize with 0 if empty constructor
 BigNumber::BigNumber() {
 	value.push_back(0);
 }
@@ -29,8 +30,11 @@ BigNumber& BigNumber::operator=(const BigNumber& a) {
 BigNumber BigNumber::operator+(const BigNumber& a) const {
 	BigNumber s;
 	s.value.clear();
+
 	int d1, d2, carry = 0;
 	long long ds;
+
+	//add component by component, remember carry
 	for(size_t i = 0; i < value.size() || i < a.value.size() || 0 != carry; ++i) {
 		if(i < value.size()) {
 			d1 = value[i];
@@ -66,15 +70,12 @@ BigNumber BigNumber::operator*(const BigNumber& a) const {
 	int d1, d2, carry = 0;
 	long long dp;
 	
-	//se inmulteste fiecare componenta cu fiecare componenta, 
-	//incepand de la ultima
+	//use classic multiplication algorithm
 
 	for(size_t j = 0; j < a.value.size(); ++j) {
 		d2 = a.value[j];
 		partialProduct.value.clear();
 
-		//ca si la algoritmul clasic de inmultire, se adauga atatea zerouri
-		//cat e ordinul cifrei pe care o inmultim
 		for(size_t k = 0; k < j; ++k)
 			partialProduct.value.push_back(0);
 
@@ -84,12 +85,12 @@ BigNumber BigNumber::operator*(const BigNumber& a) const {
 			} else {
 				d1 = 0;
 			}
-			//se inmultesc cele 2 componente de cate 9 cifre in containerul long long
+			//multiply the two 9 digit components and cast the result to a long long
 			dp = (long long)d1 * (long long)d2 + (long long)carry;
 			carry = 0;
 
-			//daca numarul obtinut are mai mult de 9 cifre, este redus si se tine minte
-			//restul pentru urmatoarea inmultire
+			//if the result has more than 9 digits, it is trimmed and the carry is 
+			//retained for the next partial multiplication
 			if(dp > 999999999) {
 				carry = dp / 1000000000;
 				dp %= 1000000000;
@@ -98,7 +99,6 @@ BigNumber BigNumber::operator*(const BigNumber& a) const {
 			partialProduct.value.push_back(dp);
 		}
 
-		//se adauga fiecare produs partial la rezultat
 		p += partialProduct;
 	}
 
@@ -115,7 +115,13 @@ std::istream& BigNumber::read(std::istream& f) {
 	std::string line;
 	f >> line;
 	bool doneReading = false;
+
+	//missingLen is a negative integer that, when added to 9,
+	//gives the number of digits of the most significant component,
+	//in case the number of digits of the read number is not divisible by 9
 	int missingLen = 0;
+
+	//read nine digits at a time and add them to the BigNumber
 	for(int pos = line.size() - 9; !doneReading; pos -= 9) {
 		if(pos < 0) {
 			missingLen = pos;
@@ -131,11 +137,15 @@ std::istream& BigNumber::read(std::istream& f) {
 }
 
 std::ostream& BigNumber::write(std::ostream& f) {
+	//the least significant components are stored first, so they are
+	//displayed in the reversed order
 	f << value[value.size() - 1];
 	int digitNo;
+
 	for(int i = value.size() - 2; i >= 0; --i) {
 		digitNo = utility_digit_digit_no(value[i]);
 
+		//display additional zeros where the component has less than 9 digits
 		while(digitNo < 9) {
 			f << 0;
 			++digitNo;
